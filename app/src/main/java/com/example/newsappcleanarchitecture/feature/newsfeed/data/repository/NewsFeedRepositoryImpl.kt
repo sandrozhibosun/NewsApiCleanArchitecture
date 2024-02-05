@@ -51,8 +51,8 @@ class NewsFeedRepositoryImpl @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
-    private suspend fun getCurrentLocalData() =
-        newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
+    private suspend fun getCurrentLocalData(): Resource<List<News>> {
+        return newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
             if (newsList.isNotEmpty()) {
                 Resource.Success(newsList.map { entity ->
                     entity.toDomain()
@@ -61,6 +61,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
                 Resource.Failure(false, null, "No news found")
             }
         }
+    }
 
     override suspend fun refreshLatestNews(): Resource<Unit> {
         return withContext(ioDispatcher) {
