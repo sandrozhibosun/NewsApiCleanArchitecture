@@ -29,9 +29,9 @@ class NewsFeedRepositoryImpl @Inject constructor(
     }
 
     private fun getNewsCacheFirst(): Flow<Resource<List<News>>> {
-        return newsFeedLocalDataSource.getLatestNews().map { news ->
-            if (news.isNotEmpty()) {
-                Resource.Success(news.map { entity ->
+        return newsFeedLocalDataSource.getLatestNews().map { newsEntities ->
+            if (newsEntities.isNotEmpty()) {
+                Resource.Success(newsEntities.map { entity ->
                     entity.toDomain()
                 })
             } else {
@@ -47,14 +47,13 @@ class NewsFeedRepositoryImpl @Inject constructor(
                     else -> Resource.Failure(false, null, "Unknown error")
                 }
             }
-        }.catch { e -> Resource.Failure(false, null, e.message) }
-            .flowOn(ioDispatcher)
+        }.catch { e -> Resource.Failure(false, null, e.message) }.flowOn(ioDispatcher)
     }
 
     private suspend fun getCurrentLocalData(): Resource<List<News>> {
-        return newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
-            if (newsList.isNotEmpty()) {
-                Resource.Success(newsList.map { entity ->
+        return newsFeedLocalDataSource.getLatestNews().first().let { newsEntities ->
+            if (newsEntities.isNotEmpty()) {
+                Resource.Success(newsEntities.map { entity ->
                     entity.toDomain()
                 })
             } else {
@@ -66,24 +65,21 @@ class NewsFeedRepositoryImpl @Inject constructor(
     override suspend fun refreshLatestNews(): Resource<Unit> {
         return withContext(ioDispatcher) {
             try {
-                withTimeout(5000L) {
-                    when (val resource = newsFeedRemoteDataSource.getLatestNews()) {
-                        is Resource.Success -> {
-                            newsFeedLocalDataSource.cleanAndSaveNews(resource.value.news.map { response ->
-                                response.toEntity()
-                            })
-                            Resource.Success(Unit)
-                        }
-
-                        is Resource.Failure -> {
-                            resource
-                        }
-
-                        else -> Resource.Failure(false, null, "Unknown error")
+                when (val resource = newsFeedRemoteDataSource.getLatestNews()) {
+                    is Resource.Success -> {
+                        val newsResponseList = resource.value.news
+                        newsFeedLocalDataSource.cleanAndSaveNews(newsResponseList.map { response ->
+                            response.toEntity()
+                        })
+                        Resource.Success(Unit)
                     }
+
+                    is Resource.Failure -> {
+                        resource
+                    }
+
+                    else -> Resource.Failure(false, null, "Unknown error")
                 }
-            } catch (e: TimeoutCancellationException) {
-                Resource.Failure(false, null, "Operation timed out")
             } catch (e: Exception) {
                 Resource.Failure(false, null, e.message)
             }
