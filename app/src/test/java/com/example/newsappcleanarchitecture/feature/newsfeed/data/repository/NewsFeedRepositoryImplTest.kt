@@ -76,7 +76,6 @@ class NewsFeedRepositoryImplTest {
 
             // When
             repository.getLatestNews().first()
-            testDispatcher.scheduler.advanceUntilIdle()
 
             // Then
             coVerify(exactly = 1) { remoteDataSource.getLatestNews() }
@@ -119,7 +118,6 @@ class NewsFeedRepositoryImplTest {
 
         // When
         repository.refreshLatestNews()
-        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         coVerify(exactly = 1) { localDataSource.cleanAndSaveNews(any()) }
@@ -140,5 +138,6 @@ class NewsFeedRepositoryImplTest {
 
         // Then
         coVerify(exactly = 0) { localDataSource.cleanAndSaveNews(any()) }
+        assertTrue(result is Resource.Failure)
     }
 }
