@@ -34,13 +34,22 @@ class NewsFeedRepositoryImpl @Inject constructor(
             if (news.isNotEmpty()) {
                 Resource.Success(news.map { it.toDomain() })
             } else {
-                refreshLatestNews()
-                newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
-                    if (newsList.isNotEmpty()) {
-                        Resource.Success(news.map { it.toDomain() })
-                    } else {
-                        Resource.Failure(false, null, "No news found")
+                when (val refreshResult = refreshLatestNews()) {
+                    is Resource.Success -> {
+                        newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
+                            if (newsList.isNotEmpty()) {
+                                Resource.Success(news.map { it.toDomain() })
+                            } else {
+                                Resource.Failure(false, null, "No news found")
+                            }
+                        }
                     }
+
+                    is Resource.Failure -> {
+                        refreshResult
+                    }
+
+                    else -> Resource.Failure(false, null, "Unknown error")
                 }
             }
         }.catch { e -> Resource.Failure(false, null, e.message) }
