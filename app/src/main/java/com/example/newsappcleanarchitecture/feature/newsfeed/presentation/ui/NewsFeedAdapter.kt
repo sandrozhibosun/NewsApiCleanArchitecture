@@ -24,10 +24,8 @@ class NewsFeedAdapter : RecyclerView.Adapter<NewsFeedAdapter.NewsItemViewHolder>
         notifyDataSetChanged()
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     fun setOnItemClick(onItemClick: ((News) -> Unit)? = null) {
         this.onItemClick = onItemClick
-        notifyDataSetChanged()
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): NewsItemViewHolder {
