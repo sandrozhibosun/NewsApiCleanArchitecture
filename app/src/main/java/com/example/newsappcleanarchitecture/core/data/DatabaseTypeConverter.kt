@@ -16,3 +16,29 @@ class DatabaseTypeConverter {
         return Gson().fromJson(value, Array<String>::class.java).toList()
     }
 }
+
+/**
+ *
+ *     @TypeConverter
+ *     fun employeeListToString(value: List<EmployeeEntity>): String? {
+ *         val gson = Gson()
+ *         return gson.toJson(value)
+ *     }
+ *
+ *     @TypeConverter
+ *     fun stringToEmployeeList(value: String?): List<EmployeeEntity> {
+ *         return  Gson().fromJson(value, Array<EmployeeEntity>::class.java).toList()
+ *
+ *     }
+ *
+ *         @TypeConverter
+ *     fun employeeToString(value: EmployeeEntity): String? {
+ *         val gson = Gson()
+ *         return gson.toJson(value)
+ *     }
+ *
+ *     @TypeConverter
+ *     fun stringToEmployee(value: String?): EmployeeEntity {
+ *         return  Gson().fromJson(value, EmployeeEntity::class.java)
+ *     }
+ */
