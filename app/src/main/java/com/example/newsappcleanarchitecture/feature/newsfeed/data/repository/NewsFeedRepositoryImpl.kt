@@ -12,7 +12,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
@@ -38,7 +37,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
             } else {
                 when (val refreshResult = refreshLatestNews()) {
                     is Resource.Success -> {
-                        getCurrentNewsFeedDataSourceData()
+                        getCurrentLocalData()
                     }
 
                     is Resource.Failure -> {
@@ -52,7 +51,7 @@ class NewsFeedRepositoryImpl @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
-    private suspend fun getCurrentNewsFeedDataSourceData() =
+    private suspend fun getCurrentLocalData() =
         newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
             if (newsList.isNotEmpty()) {
                 Resource.Success(newsList.map { entity ->
