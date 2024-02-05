@@ -32,17 +32,13 @@ class NewsFeedRepositoryImpl @Inject constructor(
     private fun getNewsCacheFirst(): Flow<Resource<List<News>>> {
         return newsFeedLocalDataSource.getLatestNews().map { news ->
             if (news.isNotEmpty()) {
-                Resource.Success(news.map { it.toDomain() })
+                Resource.Success(news.map { entity ->
+                    entity.toDomain()
+                })
             } else {
                 when (val refreshResult = refreshLatestNews()) {
                     is Resource.Success -> {
-                        newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
-                            if (newsList.isNotEmpty()) {
-                                Resource.Success(news.map { it.toDomain() })
-                            } else {
-                                Resource.Failure(false, null, "No news found")
-                            }
-                        }
+                        getCurrentNewsFeedDataSourceData()
                     }
 
                     is Resource.Failure -> {
@@ -56,13 +52,26 @@ class NewsFeedRepositoryImpl @Inject constructor(
             .flowOn(ioDispatcher)
     }
 
+    private suspend fun getCurrentNewsFeedDataSourceData() =
+        newsFeedLocalDataSource.getLatestNews().first().let { newsList ->
+            if (newsList.isNotEmpty()) {
+                Resource.Success(newsList.map { entity ->
+                    entity.toDomain()
+                })
+            } else {
+                Resource.Failure(false, null, "No news found")
+            }
+        }
+
     override suspend fun refreshLatestNews(): Resource<Unit> {
         return withContext(ioDispatcher) {
             try {
                 withTimeout(5000L) {
                     when (val resource = newsFeedRemoteDataSource.getLatestNews()) {
                         is Resource.Success -> {
-                            newsFeedLocalDataSource.cleanAndSaveNews(resource.value.news.map { it.toEntity() })
+                            newsFeedLocalDataSource.cleanAndSaveNews(resource.value.news.map { response ->
+                                response.toEntity()
+                            })
                             Resource.Success(Unit)
                         }
 
