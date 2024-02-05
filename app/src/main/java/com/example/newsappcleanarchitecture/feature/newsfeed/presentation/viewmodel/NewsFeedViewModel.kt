@@ -43,6 +43,13 @@ class NewsFeedViewModel @Inject constructor(
         getLatestNews()
     }
 
+
+    /**
+     * Retrieves the latest news using the [getNewsFeedUseCase].
+     *
+     * Observes the resource emitted by the use case to update the UI state accordingly,
+     * including loading indicators and handling success or failure states.
+     */
     private fun getLatestNews() {
         getNewsFeedUseCase().onStart { _loadingState.value = true }
             .catch { e -> _errorState.value = e.message }
@@ -66,6 +73,13 @@ class NewsFeedViewModel @Inject constructor(
             .launchIn(viewModelScope)
     }
 
+    /**
+     * Initiates a refresh of the news data via the [refreshNewsUseCase].
+     *
+     * This function is typically called by user interaction to refresh the data displayed.
+     * It updates the loading state and handles the result of the refresh operation,
+     * updating the UI state as necessary.
+     */
     fun refreshNews() {
         viewModelScope.launch(exceptionHandler) {
             _loadingState.value = true

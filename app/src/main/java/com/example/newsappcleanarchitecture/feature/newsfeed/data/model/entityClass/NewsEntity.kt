@@ -7,7 +7,6 @@ import androidx.room.PrimaryKey
 data class NewsEntity(
     @PrimaryKey val id: String,
     val author: String,
-    // Serialize the List<String> to a JSON String
     val category: List<String>,
     val description: String,
     val image: String,
