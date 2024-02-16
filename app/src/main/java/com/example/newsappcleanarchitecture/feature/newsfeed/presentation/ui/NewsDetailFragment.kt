@@ -4,6 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
+import androidx.compose.runtime.Composable
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.flowWithLifecycle
@@ -66,11 +70,22 @@ class NewsDetailFragment : Fragment() {
 
             }
         }
+        binding.composeView.setContent {
+            news?.let { NewsDetail(it) }
+        }
     }
 
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+}
+
+@Composable
+fun NewsDetail(news: News) {
+    // A surface container using the 'background' color from the theme
+    Surface(color = MaterialTheme.colors.background) {
+        Text(text = "Hello, ${news.title}")
     }
 }
